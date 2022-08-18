@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <script src="https://cdn.jsdelivr.net/pyodide/v0.21.0/full/pyodide.js"></script>
+  </head>
+  <body>
+    Pyodide test page <br>
+    Open your browser console to see Pyodide output
+    <script type="text/javascript">
+      async function main(){
+        let pyodide = await loadPyodide();
+
+        // install django
+        await pyodide.loadPackage("micropip");
+        const micropip = pyodide.pyimport("micropip");
+        await micropip.install('Django');
+
+        // pull project files
+        let zipResponse = await fetch("Archive.zip");
+        let zipBinary = await zipResponse.arrayBuffer();
+        pyodide.unpackArchive(zipBinary, "zip");
+
+        console.log(pyodide.runPython(`
+            import sys
+            sys.version
+            from mysite.models import Question
+            print(Question.objects.all())
+        `));
+        pyodide.runPython("print(1 + 2)");
+      }
+      main();
+    </script>
+  </body>
+</html>
